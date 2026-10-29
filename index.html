@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>แบบทดสอบบุคลิกภาพความคิดสร้างสรรค์ (Layered Art Generator)</title>
+    <style>
+        :root {
+            --bg-color: #0f172a;
+            --card-bg: #1e293b;
+            --primary: #8b5cf6;
+            --primary-hover: #7c3aed;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --accent: #ec4899;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 600px;
+            background: var(--card-bg);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+            box-sizing: border-box;
+        }
+
+        h1 {
+            text-align: center;
+            font-size: 1.5rem;
+            margin-bottom: 10px;
+            color: var(--primary);
+        }
+
+        p.subtitle {
+            text-align: center;
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            margin-bottom: 25px;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 6px;
+            background: #334155;
+            border-radius: 3px;
+            margin-bottom: 20px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: var(--primary);
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+
+        .question-box h3 {
+            font-size: 1.1rem;
+            margin-bottom: 15px;
+            line-height: 1.5;
+        }
+
+        .options-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        button.option-btn {
+            background: #334155;
+            color: var(--text-main);
+            border: 2px solid transparent;
+            padding: 14px 18px;
+            border-radius: 10px;
+            text-align: left;
+            cursor: pointer;
+            font-size: 0.95rem;
+            transition: all 0.2s ease;
+        }
+
+        button.option-btn:hover {
+            background: #475569;
+            border-color: var(--primary);
+        }
+
+        /* Result Section */
+        .result-section {
+            text-align: center;
+            display: none;
+        }
+
+        .canvas-preview {
+            width: 300px;
+            height: 300px;
+            margin: 0 auto 20px auto;
+            border-radius: 15px;
+            background: #0f172a;
+            border: 2px solid var(--primary);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+            position: relative;
+        }
+
+        canvas {
+            width: 100%;
+            height: 100%;
+        }
+
+        .trait-badge {
+            display: inline-block;
+            background: rgba(139, 92, 246, 0.2);
+            color: var(--primary);
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-weight: bold;
+            font-size: 0.9rem;
+            margin-bottom: 15px;
+        }
+
+        .result-desc {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            line-height: 1.6;
+            margin-bottom: 20px;
+            text-align: left;
+            background: rgba(15, 23, 42, 0.5);
+            padding: 15px;
+            border-radius: 10px;
+        }
+
+        .action-btns {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+        }
+
+        .action-btn {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: background 0.2s;
+        }
+
+        .action-btn:hover {
+            background: var(--primary-hover);
+        }
+
+        .action-btn.secondary {
+            background: #334155;
+        }
+        .action-btn.secondary:hover {
+            background: #475569;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <!-- หน้าทำแบบทดสอบ -->
+    <div id="quiz-container">
+        <h1 id="quiz-title">แบบวัดความคิดสร้างสรรค์</h1>
+        <p class="subtitle" id="quiz-subtitle">สะท้อนตัวตนผ่านกระบวนการคิดและสร้างสรรค์ภาพวาดเฉพาะคุณ</p>
+        
+        <div class="progress-bar">
+            <div class="progress-fill" id="progress-fill"></div>
+        </div>
+
+        <div class="question-box" id="question-box">
+            <!-- คำถามจะถูกโหลดมาตรงนี้ด้วย JS -->
+        </div>
+    </div>
+
+    <!-- หน้าแสดงผลลัพธ์ -->
+    <div id="result-container" class="result-section">
+        <h1>ภาพสะท้อนจิตวิญญาณของคุณ</h1>
+        <div class="canvas-preview">
+            <!-- Canvas สำหรับรวมเลเยอร์ภาพ -->
+            <canvas id="artCanvas" width="400" height="400"></canvas>
+        </div>
+        <div id="trait-badge" class="trait-badge">Trait</div>
+        <div id="result-desc" class="result-desc">คำอธิบายผลลัพธ์...</div>
+        
+        <div class="action-btns">
+            <button class="action-btn" onclick="downloadImage()">📥 ดาวน์โหลดภาพผลลัพธ์</button>
+            <button class="action-btn secondary" onclick="restartQuiz()">🔄 ทําใหม่อีกครั้ง</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    // ชุดคำถามจำลองอิงตามทฤษฎี Guilford & Wallas
+    const questions = [
+        {
+            stage: "Stage 1: Preparation (ขั้นเตรียมข้อมูล)",
+            question: "เมื่อคุณได้รับโจทย์ให้ออกแบบเมืองในจินตนาการ สิ่งแรกที่คุณจะทำคืออะไร?",
+            options: [
+                { text: "ระดมความคิด เขียนลิสต์คำศัพท์และไอเดียรัวๆ ให้ได้เยอะที่สุด", scores: { fluency: 3, originality: 1, flexibility: 0, elaboration: 0 } },
+                { text: "หาข้อมูลอ้างอิง วางโครงสร้างและรายละเอียดระบบเมืองให้แน่น", scores: { fluency: 0, originality: 0, flexibility: 0, elaboration: 3 } }
+            ]
+        },
+        {
+            stage: "Stage 2: Incubation (ขั้นฟักตัว / ปล่อยวาง)",
+            question: "คิดงานมาทั้งวันแล้วตัน ไอเดียไม่มา คุณเลือกจะทำอะไร?",
+            options: [
+                { text: "ออกไปเดินเล่น ปล่อยให้สมองไหลไปกับสิ่งรอบตัว มองหาความเชื่อมโยงแปลกๆ", scores: { fluency: 0, originality: 0, flexibility: 3, elaboration: 0 } },
+                { text: "หลับตาจินตนาการถึงภาพเหนือจริงที่ไม่มีอยู่จริงบนโลก", scores: { fluency: 0, originality: 3, flexibility: 1, elaboration: 0 } }
+            ]
+        },
+        {
+            stage: "Stage 3: Illumination (ขั้นปิ๊งไอเดีย)",
+            question: "จู่ๆ ไอเดียเด็ดก็พุ่งเข้ามา ภาพแรกในหัวของคุณคืออะไร?",
+            options: [
+                { text: "สิ่งก่อสร้างลอยฟ้าทรงเรขาคณิตล้ำอนาคต", scores: { fluency: 1, originality: 2, flexibility: 0, elaboration: 1 } },
+                { text: "ป่าเรืองแสงลึกลับที่มีสิ่งมีชีวิตพึ่งพาอาศัยกันอย่างลงตัว", scores: { fluency: 0, originality: 3, flexibility: 2, elaboration: 0 } }
+            ]
+        },
+        {
+            stage: "Stage 4: Verification (ขั้นตรวจสอบ)",
+            question: "ก่อนนำไอเดียนี้ไปเสนอคนอื่น คุณให้ความสำคัญกับอะไรมากที่สุด?",
+            options: [
+                { text: "ความแปลกใหม่ที่ไม่ซ้ำใคร ใครเห็นก็ต้องว้าว", scores: { fluency: 0, originality: 3, flexibility: 0, elaboration: 0 } },
+                { text: "ความประณีต รายละเอียดครบถ้วนสมบูรณ์แบบ", scores: { fluency: 0, originality: 0, flexibility: 0, elaboration: 3 } }
+            ]
+        }
+    ];
+
+    let currentQuestion = 0;
+    let scores = { fluency: 0, flexibility: 0, originality: 0, elaboration: 0 };
+
+    const questionBox = document.getElementById('question-box');
+    const progressFill = document.getElementById('progress-fill');
+    const quizContainer = document.getElementById('quiz-container');
+    const resultContainer = document.getElementById('result-container');
+
+    function loadQuestion() {
+        let q = questions[currentQuestion];
+        let progress = ((currentQuestion) / questions.length) * 100;
+        progressFill.style.width = progress + '%';
+
+        let html = `<h3><span style="color:var(--primary); font-size:0.85rem; display:block; margin-bottom:5px;">${q.stage}</span>${q.question}</h3><div class="options-list">`;
+        
+        q.options.forEach((opt, index) => {
+            html += `<button class="option-btn" onclick="selectOption(${index})">${opt.text}</button>`;
+        });
+        html += `</div>`;
+        questionBox.innerHTML = html;
+    }
+
+    function selectOption(optionIndex) {
+        let selectedOpt = questions[currentQuestion].options[optionIndex];
+        for (let key in selectedOpt.scores) {
+            scores[key] += selectedOpt.scores[key];
+        }
+
+        currentQuestion++;
+        if (currentQuestion < questions.length) {
+            loadQuestion();
+        } else {
+            showResult();
+        }
+    }
+
+    function showResult() {
+        quizContainer.style.display = 'none';
+        resultContainer.style.display = 'block';
+
+        // หาแกนคะแนนที่สูงที่สุดเพื่อกำหนดธีม/ฉากหลัง
+        let highestTrait = Object.keys(scores).reduce((a, b) => scores[a] > scores[b] ? a : b);
+        
+        let traitNames = {
+            fluency: "The Idea Sprout (สายไอเดียพรั่งพรู)",
+            flexibility: "The Fluid Nomad (สายยืดหยุ่นพลิกแพลง)",
+            originality: "The Surreal Alchemist (สายหลุดกรอบแปลกใหม่)",
+            elaboration: "The Master Architect (สายละเอียดประณีตบรรจง)"
+        };
+
+        let descriptions = {
+            fluency: "คุณมีความสามารถในการผลิตความคิดและทางเลือกออกมาในปริมาณมากได้อย่างรวดเร็ว เปรียบเสมือนเมล็ดพันธุ์แห่งไอเดียที่พร้อมงอกงามในทุกสถานการณ์",
+            flexibility: "คุณมองโลกได้หลากหลายมิติ ปรับตัวเก่ง และเชื่อมโยงสิ่งต่างๆ เข้าด้วยกันได้อย่างไร้รอยต่อ ไร้กรอบจำกัด",
+            originality: "คุณมีความคิดสร้างสรรค์ระดับยูนีค มองเห็นมุมมองที่คนอื่นคาดไม่ถึง กล้าที่จะสร้างสรรค์สิ่งใหม่ที่แตกต่างอย่างสิ้นเชิง",
+            elaboration: "คุณมีความใส่ใจในรายละเอียดระดับสูง สามารถต่อยอดไอเดียเล็กๆ ให้กลายเป็นชิ้นงานที่สมบูรณ์แบบและทรงพลังได้"
+        };
+
+        document.getElementById('trait-badge').innerText = traitNames[highestTrait];
+        document.getElementById('result-desc').innerText = descriptions[highestTrait];
+
+        // สร้างภาพด้วย Canvas (จำลองการรวมเลเยอร์ตามคะแนน)
+        generateLayeredArt(highestTrait);
+    }
+
+    // ฟังก์ชันจำลองการเอาชิ้นส่วนภาพมาซ้อนทับกันด้วย Canvas
+    function generateLayeredArt(dominantTrait) {
+        const canvas = document.getElementById('artCanvas');
+        const ctx = canvas.getContext('2d');
+
+        // เคลียร์แคนวาส
+        ctx.clearRect(0, 0, 400, 400);
+
+        // 1. วาดฉากหลัง (Background Base ตามคะแนน Flexibility)
+        let gradient = ctx.createLinearGradient(0, 0, 400, 400);
+        gradient.addColorStop(0, '#1e293b');
+        gradient.addColorStop(1, dominantTrait === 'originality' ? '#4c1d95' : '#0f172a');
+        ctx.fillStyle = gradient;
+        ctx.fillRect(0, 0, 400, 400);
+
+        // 2. วาดองค์ประกอบหลัก (Core Shape ตามคะแนน Originality)
+        ctx.beginPath();
+        if (dominantTrait === 'originality') {
+            ctx.arc(200, 200, 80, 0, Math.PI * 2);
+            ctx.fillStyle = '#ec4899';
+        } else if (dominantTrait === 'elaboration') {
+            ctx.rect(120, 120, 160, 160);
+            ctx.fillStyle = '#8b5cf6';
+        } else {
+            ctx.arc(200, 200, 100, 0, Math.PI * 2);
+            ctx.fillStyle = '#06b6d4';
+        }
+        ctx.fill();
+        ctx.closePath();
+
+        // 3. วาดรายละเอียดเสริม (Details Layer ตามคะแนน Elaboration)
+        ctx.strokeStyle = '#ffffff';
+        ctx.lineWidth = 4;
+        ctx.beginPath();
+        ctx.arc(200, 200, 120 + (scores.elaboration * 5), 0, Math.PI * 2);
+        ctx.stroke();
+
+        // ใส่ข้อความลายเซ็นบนภาพ
+        ctx.fillStyle = '#94a3b8';
+        ctx.font = '14px sans-serif';
+        ctx.fillText("Creative Psyche Test © 2026", 20, 375);
+    }
+
+    function downloadImage() {
+        const canvas = document.getElementById('artCanvas');
+        const link = document.createElement('a');
+        link.download = 'my-creative-psyche-art.png';
+        link.href = canvas.toDataURL('image/png');
+        link.click();
+    }
+
+    function restartQuiz() {
+        currentQuestion = 0;
+        scores = { fluency: 0, flexibility: 0, originality: 0, elaboration: 0 };
+        resultContainer.style.display = 'none';
+        quizContainer.style.display = 'block';
+        loadQuestion();
+    }
+
+    // เริ่มต้นรันข้อแรกเมื่อโหลดเว็บ
+    loadQuestion();
+</script>
+
+</body>
+</html>
