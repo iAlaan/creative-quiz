@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>แบบทดสอบบุคลิกภาพความคิดสร้างสรรค์ (Layered Art Generator)</title>
+    <title>Visual Creative Psyche Assessment (Organizational Tool)</title>
     <style>
         :root {
             --bg-color: #0f172a;
@@ -13,6 +13,7 @@
             --text-main: #f8fafc;
             --text-muted: #94a3b8;
             --accent: #ec4899;
+            --border: #334155;
         }
 
         body {
@@ -29,7 +30,7 @@
 
         .container {
             width: 100%;
-            max-width: 600px;
+            max-width: 650px;
             background: var(--card-bg);
             border-radius: 20px;
             padding: 30px;
@@ -39,24 +40,24 @@
 
         h1 {
             text-align: center;
-            font-size: 1.5rem;
-            margin-bottom: 10px;
+            font-size: 1.3rem;
+            margin-bottom: 5px;
             color: var(--primary);
         }
 
         p.subtitle {
             text-align: center;
             color: var(--text-muted);
-            font-size: 0.9rem;
+            font-size: 0.85rem;
             margin-bottom: 25px;
         }
 
         .progress-bar {
             width: 100%;
             height: 6px;
-            background: #334155;
+            background: var(--border);
             border-radius: 3px;
-            margin-bottom: 20px;
+            margin-bottom: 25px;
             overflow: hidden;
         }
 
@@ -67,53 +68,92 @@
             transition: width 0.3s ease;
         }
 
-        .question-box h3 {
+        .step-title {
             font-size: 1.1rem;
             margin-bottom: 15px;
-            line-height: 1.5;
+            color: var(--accent);
+            text-align: center;
         }
 
-        .options-list {
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
+        /* Image Choice Grid */
+        .choices-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            margin-bottom: 25px;
         }
 
-        button.option-btn {
-            background: #334155;
-            color: var(--text-main);
-            border: 2px solid transparent;
-            padding: 14px 18px;
-            border-radius: 10px;
-            text-align: left;
+        .choice-card {
+            background: rgba(15, 23, 42, 0.6);
+            border: 2px solid var(--border);
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
             cursor: pointer;
-            font-size: 0.95rem;
             transition: all 0.2s ease;
         }
 
-        button.option-btn:hover {
-            background: #475569;
+        .choice-card:hover {
             border-color: var(--primary);
+            background: rgba(139, 92, 246, 0.1);
+        }
+
+        .choice-card.selected {
+            border-color: var(--accent);
+            background: rgba(236, 72, 153, 0.15);
+            box-shadow: 0 0 12px rgba(236, 72, 153, 0.3);
+        }
+
+        .choice-icon {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+        }
+
+        .choice-text {
+            font-size: 0.9rem;
+            color: var(--text-main);
+        }
+
+        .nav-btn {
+            width: 100%;
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 14px;
+            border-radius: 10px;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .nav-btn:hover {
+            background: var(--primary-hover);
+        }
+
+        .nav-btn:disabled {
+            background: #334155;
+            color: #64748b;
+            cursor: not-allowed;
         }
 
         /* Result Section */
         .result-section {
-            text-align: center;
             display: none;
+            text-align: center;
         }
 
-        .canvas-preview {
-            width: 300px;
-            height: 300px;
+        .canvas-container {
+            width: 250px;
+            height: 250px;
             margin: 0 auto 20px auto;
             border-radius: 15px;
             background: #0f172a;
             border: 2px solid var(--primary);
+            overflow: hidden;
             display: flex;
             justify-content: center;
             align-items: center;
-            overflow: hidden;
-            position: relative;
         }
 
         canvas {
@@ -121,159 +161,141 @@
             height: 100%;
         }
 
-        .trait-badge {
-            display: inline-block;
-            background: rgba(139, 92, 246, 0.2);
-            color: var(--primary);
-            padding: 6px 14px;
-            border-radius: 20px;
-            font-weight: bold;
-            font-size: 0.9rem;
-            margin-bottom: 15px;
-        }
-
-        .result-desc {
-            color: var(--text-muted);
-            font-size: 0.9rem;
-            line-height: 1.6;
-            margin-bottom: 20px;
-            text-align: left;
+        .result-box {
             background: rgba(15, 23, 42, 0.5);
+            border: 1px solid var(--border);
+            border-radius: 12px;
             padding: 15px;
-            border-radius: 10px;
+            margin-bottom: 15px;
+            text-align: left;
+            font-size: 0.85rem;
+            line-height: 1.6;
         }
 
-        .action-btns {
-            display: flex;
-            gap: 10px;
-            justify-content: center;
-        }
-
-        .action-btn {
-            background: var(--primary);
-            color: white;
-            border: none;
-            padding: 12px 20px;
-            border-radius: 10px;
-            cursor: pointer;
-            font-weight: bold;
-            transition: background 0.2s;
-        }
-
-        .action-btn:hover {
-            background: var(--primary-hover);
-        }
-
-        .action-btn.secondary {
-            background: #334155;
-        }
-        .action-btn.secondary:hover {
-            background: #475569;
+        .result-box h3 {
+            margin-top: 0;
+            color: var(--primary);
+            font-size: 0.95rem;
+            margin-bottom: 6px;
         }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <!-- หน้าทำแบบทดสอบ -->
+    <!-- หน้าทำแบบประเมินแบบเลือกภาพ -->
     <div id="quiz-container">
-        <h1 id="quiz-title">แบบวัดความคิดสร้างสรรค์</h1>
-        <p class="subtitle" id="quiz-subtitle">สะท้อนตัวตนผ่านกระบวนการคิดและสร้างสรรค์ภาพวาดเฉพาะคุณ</p>
+        <h1>Visual Creative Profile</h1>
+        <p class="subtitle">เลือกสัญลักษณ์ที่ตรงกับสไตล์การทำงานและกระบวนการคิดของคุณในแต่ละสถานการณ์</p>
         
         <div class="progress-bar">
             <div class="progress-fill" id="progress-fill"></div>
         </div>
 
-        <div class="question-box" id="question-box">
-            <!-- คำถามจะถูกโหลดมาตรงนี้ด้วย JS -->
+        <div id="step-container">
+            <div class="step-title" id="step-title">คำถาม...</div>
+            <div class="choices-grid" id="choices-grid">
+                <!-- ตัวเลือกภาพจะถูกโหลดด้วย JS -->
+            </div>
         </div>
+
+        <button class="nav-btn" id="next-btn" onclick="nextStep()" disabled>เลือกสัญลักษณ์นี้แล้วไปต่อ</button>
     </div>
 
-    <!-- หน้าแสดงผลลัพธ์ -->
+    <!-- หน้าแสดงผลลัพธ์พร้อม Canvas รวมเลเยอร์ภาพ -->
     <div id="result-container" class="result-section">
-        <h1>ภาพสะท้อนจิตวิญญาณของคุณ</h1>
-        <div class="canvas-preview">
-            <!-- Canvas สำหรับรวมเลเยอร์ภาพ -->
-            <canvas id="artCanvas" width="400" height="400"></canvas>
-        </div>
-        <div id="trait-badge" class="trait-badge">Trait</div>
-        <div id="result-desc" class="result-desc">คำอธิบายผลลัพธ์...</div>
+        <h1>รายงานผลและภาพสะท้อนตัวตน</h1>
+        <p class="subtitle" id="res-archetype-name">ชื่อโปรไฟล์</p>
         
-        <div class="action-btns">
-            <button class="action-btn" onclick="downloadImage()">📥 ดาวน์โหลดภาพผลลัพธ์</button>
-            <button class="action-btn secondary" onclick="restartQuiz()">🔄 ทําใหม่อีกครั้ง</button>
+        <div class="canvas-container">
+            <canvas id="resultCanvas" width="400" height="400"></canvas>
         </div>
+
+        <div class="result-box">
+            <h3>🎨 สไตล์ความคิดสร้างสรรค์ของคุณ</h3>
+            <p id="res-desc">วิเคราะห์...</p>
+        </div>
+
+        <div class="result-box">
+            <h3>🛠️ ข้อแนะนำการพัฒนาและการทำงานในองค์กร</h3>
+            <p id="res-action">คำแนะนำ...</p>
+        </div>
+
+        <button class="nav-btn" onclick="location.reload()">🔄 ทำแบบประเมินใหม่อีกครั้ง</button>
     </div>
 </div>
 
 <script>
-    // ชุดคำถามจำลองอิงตามทฤษฎี Guilford & Wallas
-    const questions = [
+    // ฐานข้อมูลสถานการณ์และตัวเลือกภาพ (Visual Cards)
+    const steps = [
         {
             stage: "Stage 1: Preparation (ขั้นเตรียมข้อมูล)",
-            question: "เมื่อคุณได้รับโจทย์ให้ออกแบบเมืองในจินตนาการ สิ่งแรกที่คุณจะทำคืออะไร?",
+            question: "เมื่อเริ่มโปรเจกต์ใหม่ สไตล์การเก็บข้อมูลของคุณคล้ายกับอะไร?",
             options: [
-                { text: "ระดมความคิด เขียนลิสต์คำศัพท์และไอเดียรัวๆ ให้ได้เยอะที่สุด", scores: { fluency: 3, originality: 1, flexibility: 0, elaboration: 0 } },
-                { text: "หาข้อมูลอ้างอิง วางโครงสร้างและรายละเอียดระบบเมืองให้แน่น", scores: { fluency: 0, originality: 0, flexibility: 0, elaboration: 3 } }
+                { id: "p1", icon: "🌐", text: "มองภาพกว้างเชื่อมโยงรอบด้าน", trait: "flexibility", shape: "circle" },
+                { id: "p2", icon: "📐", text: "วางโครงสร้างและระบบระเบียบ", trait: "elaboration", shape: "square" }
             ]
         },
         {
-            stage: "Stage 2: Incubation (ขั้นฟักตัว / ปล่อยวาง)",
-            question: "คิดงานมาทั้งวันแล้วตัน ไอเดียไม่มา คุณเลือกจะทำอะไร?",
+            stage: "Stage 2: Illumination (ขั้นปิ๊งไอเดีย)",
+            question: "เวลาที่คุณได้ไอเดียเจ๋งๆ ลักษณะมันมักจะเป็นแบบไหน?",
             options: [
-                { text: "ออกไปเดินเล่น ปล่อยให้สมองไหลไปกับสิ่งรอบตัว มองหาความเชื่อมโยงแปลกๆ", scores: { fluency: 0, originality: 0, flexibility: 3, elaboration: 0 } },
-                { text: "หลับตาจินตนาการถึงภาพเหนือจริงที่ไม่มีอยู่จริงบนโลก", scores: { fluency: 0, originality: 3, flexibility: 1, elaboration: 0 } }
+                { id: "i1", icon: "⚡", text: "พรั่งพรู รวดเร็ว ไหลมาเทมา", trait: "fluency", shape: "burst" },
+                { id: "i2", icon: "🔮", text: "แปลกใหม่ หลุดกรอบคาดไม่ถึง", trait: "originality", shape: "star" }
             ]
         },
         {
-            stage: "Stage 3: Illumination (ขั้นปิ๊งไอเดีย)",
-            question: "จู่ๆ ไอเดียเด็ดก็พุ่งเข้ามา ภาพแรกในหัวของคุณคืออะไร?",
+            stage: "Stage 3: Verification (ขั้นตรวจสอบ & บริหารจัดการ)",
+            question: "สิ่งที่คุณมักจะต้องระมัดระวังหรือท้าทายที่สุดในช่วงปิดโปรเจกต์คืออะไร?",
             options: [
-                { text: "สิ่งก่อสร้างลอยฟ้าทรงเรขาคณิตล้ำอนาคต", scores: { fluency: 1, originality: 2, flexibility: 0, elaboration: 1 } },
-                { text: "ป่าเรืองแสงลึกลับที่มีสิ่งมีชีวิตพึ่งพาอาศัยกันอย่างลงตัว", scores: { fluency: 0, originality: 3, flexibility: 2, elaboration: 0 } }
-            ]
-        },
-        {
-            stage: "Stage 4: Verification (ขั้นตรวจสอบ)",
-            question: "ก่อนนำไอเดียนี้ไปเสนอคนอื่น คุณให้ความสำคัญกับอะไรมากที่สุด?",
-            options: [
-                { text: "ความแปลกใหม่ที่ไม่ซ้ำใคร ใครเห็นก็ต้องว้าว", scores: { fluency: 0, originality: 3, flexibility: 0, elaboration: 0 } },
-                { text: "ความประณีต รายละเอียดครบถ้วนสมบูรณ์แบบ", scores: { fluency: 0, originality: 0, flexibility: 0, elaboration: 3 } }
+                { id: "v1", icon: "🔍", text: "การตรวจเช็กดีเทลยิบย่อยไม่ให้ตกหล่น", trait: "elaboration", shape: "ring" },
+                { id: "v2", icon: "🔄", text: "การปรับตัวเมื่อเจอแผนเปลี่ยนกะทันหัน", trait: "executive", shape: "wave" }
             ]
         }
     ];
 
-    let currentQuestion = 0;
-    let scores = { fluency: 0, flexibility: 0, originality: 0, elaboration: 0 };
+    let currentStep = 0;
+    let selectedChoices = [];
+    let userSelections = {};
 
-    const questionBox = document.getElementById('question-box');
+    const stepTitle = document.getElementById('step-title');
+    const choicesGrid = document.getElementById('choices-grid');
+    const nextBtn = document.getElementById('next-btn');
     const progressFill = document.getElementById('progress-fill');
     const quizContainer = document.getElementById('quiz-container');
     const resultContainer = document.getElementById('result-container');
 
-    function loadQuestion() {
-        let q = questions[currentQuestion];
-        let progress = ((currentQuestion) / questions.length) * 100;
-        progressFill.style.width = progress + '%';
-
-        let html = `<h3><span style="color:var(--primary); font-size:0.85rem; display:block; margin-bottom:5px;">${q.stage}</span>${q.question}</h3><div class="options-list">`;
+    function loadStep() {
+        let st = steps[currentStep];
+        stepTitle.innerText = `${st.stage} : ${st.question}`;
         
-        q.options.forEach((opt, index) => {
-            html += `<button class="option-btn" onclick="selectOption(${index})">${opt.text}</button>`;
+        let html = "";
+        st.options.forEach((opt, idx) => {
+            let isSelected = userSelections[currentStep] === idx ? "selected" : "";
+            html += `
+                <div class="choice-card ${isSelected}" onclick="selectChoice(${idx})">
+                    <div class="choice-icon">${opt.icon}</div>
+                    <div class="choice-text">${opt.text}</div>
+                </div>
+            `;
         });
-        html += `</div>`;
-        questionBox.innerHTML = html;
+        choicesGrid.innerHTML = html;
+
+        let progress = ((currentStep) / steps.length) * 100;
+        progressFill.style.width = progress + '%';
+        nextBtn.disabled = userSelections[currentStep] === undefined;
     }
 
-    function selectOption(optionIndex) {
-        let selectedOpt = questions[currentQuestion].options[optionIndex];
-        for (let key in selectedOpt.scores) {
-            scores[key] += selectedOpt.scores[key];
-        }
+    function selectChoice(idx) {
+        userSelections[currentStep] = idx;
+        // เรนเดอร์ใหม่เพื่ออัปเดตกรอบที่เลือก
+        loadStep();
+    }
 
-        currentQuestion++;
-        if (currentQuestion < questions.length) {
-            loadQuestion();
+    function nextStep() {
+        currentStep++;
+        if (currentStep < steps.length) {
+            loadStep();
         } else {
             showResult();
         }
@@ -282,92 +304,68 @@
     function showResult() {
         quizContainer.style.display = 'none';
         resultContainer.style.display = 'block';
+        progressFill.style.width = '100%';
 
-        // หาแกนคะแนนที่สูงที่สุดเพื่อกำหนดธีม/ฉากหลัง
-        let highestTrait = Object.keys(scores).reduce((a, b) => scores[a] > scores[b] ? a : b);
+        // ดึงข้อมูลตัวเลือกที่ผู้ใช้เลือกมาเก็บไว้
+        let choices = steps.map((st, idx) => st.options[userSelections[idx]]);
         
-        let traitNames = {
-            fluency: "The Idea Sprout (สายไอเดียพรั่งพรู)",
-            flexibility: "The Fluid Nomad (สายยืดหยุ่นพลิกแพลง)",
-            originality: "The Surreal Alchemist (สายหลุดกรอบแปลกใหม่)",
-            elaboration: "The Master Architect (สายละเอียดประณีตบรรจง)"
-        };
+        // กำหนดชื่อโปรไฟล์จำลองตามรูปทรงที่เลือก
+        document.getElementById('res-archetype-name').innerText = "✨ The Creative Synthesizer (สถาปัตยกรรมทางความคิดเฉพาะคุณ)";
+        document.getElementById('res-desc').innerText = `จากการเลือกสัญลักษณ์ภาพของคุณ คุณเป็นคนที่ผสานความยืดหยุ่นเข้ากับความคิดสร้างสรรค์เชิงโครงสร้างได้อย่างลงตัว มีความสามารถในการมองภาพกว้างและผลิตไอเดียที่ทรงพลัง`;
+        document.getElementById('res-action').innerText = `คำแนะนำสำหรับองค์กร: เหมาะกับการทำงานในทีมพัฒนานวัตกรรมที่มีความยืดหยุ่นสูง แต่อาจต้องมีพาร์ทเนอร์ช่วยตรวจสอบความถูกต้องในขั้นตอนสุดท้ายเพื่อความสมบูรณ์แบบ`;
 
-        let descriptions = {
-            fluency: "คุณมีความสามารถในการผลิตความคิดและทางเลือกออกมาในปริมาณมากได้อย่างรวดเร็ว เปรียบเสมือนเมล็ดพันธุ์แห่งไอเดียที่พร้อมงอกงามในทุกสถานการณ์",
-            flexibility: "คุณมองโลกได้หลากหลายมิติ ปรับตัวเก่ง และเชื่อมโยงสิ่งต่างๆ เข้าด้วยกันได้อย่างไร้รอยต่อ ไร้กรอบจำกัด",
-            originality: "คุณมีความคิดสร้างสรรค์ระดับยูนีค มองเห็นมุมมองที่คนอื่นคาดไม่ถึง กล้าที่จะสร้างสรรค์สิ่งใหม่ที่แตกต่างอย่างสิ้นเชิง",
-            elaboration: "คุณมีความใส่ใจในรายละเอียดระดับสูง สามารถต่อยอดไอเดียเล็กๆ ให้กลายเป็นชิ้นงานที่สมบูรณ์แบบและทรงพลังได้"
-        };
-
-        document.getElementById('trait-badge').innerText = traitNames[highestTrait];
-        document.getElementById('result-desc').innerText = descriptions[highestTrait];
-
-        // สร้างภาพด้วย Canvas (จำลองการรวมเลเยอร์ตามคะแนน)
-        generateLayeredArt(highestTrait);
+        // วาดภาพประกอบเลเยอร์บน Canvas ตามภาพที่ผู้ใช้เลือก
+        drawCompositeArt(choices);
     }
 
-    // ฟังก์ชันจำลองการเอาชิ้นส่วนภาพมาซ้อนทับกันด้วย Canvas
-    function generateLayeredArt(dominantTrait) {
-        const canvas = document.getElementById('artCanvas');
+    // ฟังก์ชันวาดเลเยอร์ภาพผสมผสานตามที่ผู้ใช้เลือก
+    function drawCompositeArt(choices) {
+        const canvas = document.getElementById('resultCanvas');
         const ctx = canvas.getContext('2d');
 
-        // เคลียร์แคนวาส
         ctx.clearRect(0, 0, 400, 400);
 
-        // 1. วาดฉากหลัง (Background Base ตามคะแนน Flexibility)
-        let gradient = ctx.createLinearGradient(0, 0, 400, 400);
-        gradient.addColorStop(0, '#1e293b');
-        gradient.addColorStop(1, dominantTrait === 'originality' ? '#4c1d95' : '#0f172a');
-        ctx.fillStyle = gradient;
+        // 1. วาดพื้นหลัง Gradient
+        let grad = ctx.createLinearGradient(0, 0, 400, 400);
+        grad.addColorStop(0, '#1e293b');
+        grad.addColorStop(1, '#4c1d95');
+        ctx.fillStyle = grad;
         ctx.fillRect(0, 0, 400, 400);
 
-        // 2. วาดองค์ประกอบหลัก (Core Shape ตามคะแนน Originality)
-        ctx.beginPath();
-        if (dominantTrait === 'originality') {
-            ctx.arc(200, 200, 80, 0, Math.PI * 2);
-            ctx.fillStyle = '#ec4899';
-        } else if (dominantTrait === 'elaboration') {
-            ctx.rect(120, 120, 160, 160);
-            ctx.fillStyle = '#8b5cf6';
-        } else {
-            ctx.arc(200, 200, 100, 0, Math.PI * 2);
-            ctx.fillStyle = '#06b6d4';
-        }
-        ctx.fill();
-        ctx.closePath();
+        // 2. วาดเลเยอร์ตามรูปทรงที่ผู้ใช้เลือกในแต่ละข้อ
+        choices.forEach((choice, index) => {
+            ctx.save();
+            ctx.translate(200, 200);
 
-        // 3. วาดรายละเอียดเสริม (Details Layer ตามคะแนน Elaboration)
-        ctx.strokeStyle = '#ffffff';
-        ctx.lineWidth = 4;
-        ctx.beginPath();
-        ctx.arc(200, 200, 120 + (scores.elaboration * 5), 0, Math.PI * 2);
-        ctx.stroke();
+            if (choice.shape === 'circle' || choice.shape === 'ring') {
+                ctx.beginPath();
+                ctx.arc(0, 0, 80 + (index * 20), 0, Math.PI * 2);
+                ctx.strokeStyle = index === 0 ? '#06b6d4' : '#ec4899';
+                ctx.lineWidth = 4;
+                ctx.stroke();
+            } else if (choice.shape === 'square') {
+                ctx.beginPath();
+                ctx.rect(-70 - (index * 10), -70 - (index * 10), 140 + (index * 20), 140 + (index * 20));
+                ctx.strokeStyle = '#8b5cf6';
+                ctx.lineWidth = 3;
+                ctx.stroke();
+            } else {
+                // รูปแบบดาวหรือระเบิดไอเดีย
+                ctx.beginPath();
+                ctx.arc(0, 0, 60 + (index * 25), 0, Math.PI * 2);
+                ctx.fillStyle = index === 1 ? 'rgba(236, 72, 153, 0.3)' : 'rgba(99, 102, 241, 0.3)';
+                ctx.fill();
+            }
+            ctx.restore();
+        });
 
-        // ใส่ข้อความลายเซ็นบนภาพ
+        // ข้อความลายเซ็นบนภาพ
         ctx.fillStyle = '#94a3b8';
-        ctx.font = '14px sans-serif';
-        ctx.fillText("Creative Psyche Test © 2026", 20, 375);
+        ctx.font = '13px sans-serif';
+        ctx.fillText("Visual Psyche Blueprint © 2026", 20, 380);
     }
 
-    function downloadImage() {
-        const canvas = document.getElementById('artCanvas');
-        const link = document.createElement('a');
-        link.download = 'my-creative-psyche-art.png';
-        link.href = canvas.toDataURL('image/png');
-        link.click();
-    }
-
-    function restartQuiz() {
-        currentQuestion = 0;
-        scores = { fluency: 0, flexibility: 0, originality: 0, elaboration: 0 };
-        resultContainer.style.display = 'none';
-        quizContainer.style.display = 'block';
-        loadQuestion();
-    }
-
-    // เริ่มต้นรันข้อแรกเมื่อโหลดเว็บ
-    loadQuestion();
+    loadStep();
 </script>
 
 </body>
